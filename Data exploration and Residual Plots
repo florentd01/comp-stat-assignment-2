@@ -1,0 +1,41 @@
+library("ggplot2")
+library("tibble")
+library("bootstrap")
+library("magrittr")
+data(law)
+law %<>% add_column(observation = 1:nrow(law), .before = 1)
+ggplot(law, aes(x = LSAT, y = GPA)) +
+geom_text(aes(label = observation),
+hjust = 0, vjust = 0)
+
+# Create histograms of LSAT and GPA
+par(mfrow = c(1, 2))
+hist(law$LSAT, main = "Histogram of LSAT", xlab = "LSAT", col = "blue")
+hist(law$GPA, main = "Histogram of GPA", xlab = "GPA", col = "green")
+
+# Create boxplots of LSAT and GPA
+par(mfrow = c(1, 2))
+boxplot(law$LSAT, main = "Boxplot of LSAT", col = "blue")
+boxplot(law$GPA, main = "Boxplot of GPA", col = "green")
+
+# Fit the linear regression model
+model <- lm(GPA ~ LSAT, data = law)
+
+# Create a residual plot
+plot(model, which = 1, main = "Residual Plot")
+
+# Create a leverage plot
+plot(model, which = 5, main = "Leverage Plot")
+---------------------------------
+# Calculate Cook's distance
+cooksd <- cooks.distance(model)
+
+# Identify influential observations using Cook's distance
+influential <- as.numeric(names(cooksd)[(cooksd > 3/length(law$GPA))])
+
+# Print the influential observations
+if (length(influential) == 0) {
+  cat("There are no influential observations.")
+} else {
+  cat("The following observations are influential:", influential)
+}
